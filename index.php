@@ -9,10 +9,12 @@
 <body>
 
     <?php
+    include 'config.php';
+    include 'User.php';
+    include 'RealEstate.php';
     function showRealEstates()
     {
         include 'config.php';
-
         $count_estates = count(RealEstate::all($pdo));
 
         if ($_GET["real_estate"] != 0)
@@ -26,8 +28,6 @@
     }
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        include 'config.php';
-
         $username = isset($_POST['username']) ? $_POST['username'] : "";
         $password = isset($_POST['password']) ? $_POST['password'] : "";
 
@@ -49,19 +49,24 @@
         exit;
     }
 
+
     if (isset($_COOKIE['token']) && isset($_GET['real_estate'])) {
-        include 'config.php';
+        $estates = RealEstate::all($pdo);
 
-        $query = $pdo->prepare("SELECT * FROM real_estates");
-        $query->execute();
-        $rows = $query->fetchAll(PDO::FETCH_OBJ);
+        $i = $_GET['real_estate']; 
 
-        $i = $_GET['real_estate'];
-        print $i;
-
-        print "<h3>" . $rows[$i]->property_type . ", " . $rows[$i]->deal_type . "</h3><br>";
-        print "<h4><i>" . $rows[$i]->address . "</i><h4><br>";
-        print $rows[$i]->price . "<br>";
+        print '<form action="save.php" method="POST">
+                <p>Номер нерухомостi: ' . $estates[$i]->id . '</p>
+                <p>Мiсце знаходження: <input type="text" name="location" value="' . htmlspecialchars($estates[$i]->location) . '"></p>
+                <p>Тип нерухомостi: <input type="text" name="estate_type" value="' . htmlspecialchars($estates[$i]->estate_type->value) . '"></p>
+                <p>Тип договору: <input type="text" name="sale_type" value="' . htmlspecialchars($estates[$i]->sale_type->value) . '"></p>
+                <p>Площа: <input type="text" name="area" value="' . htmlspecialchars($estates[$i]->area) . '"></p>
+                <p>Опис: <input type="text" name="descriptiom" value="' . htmlspecialchars($estates[$i]->description) . '"></p>
+                <p>Володар нерухомостi: <input type="text" name="owner_" value="' . htmlspecialchars(User::findByID($pdo, $estates[$i]->owner_id)->fullname) . '"></p>
+                <p>Рiелтор: <input type="text" name="realtor" value="' . htmlspecialchars(User::findByID($pdo,$estates[$i]->realtor_id)->fullname) . '"></p>
+                <p>Цiна: <input type="text" name="price" value="' . htmlspecialchars($estates[$i]->price) . '"></p>
+                <input type="submit" value="Зберегти">
+            </form>';
     }
 
     if (!isset($_COOKIE['token'])) {

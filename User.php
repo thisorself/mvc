@@ -1,9 +1,9 @@
 <?php
 
-enum Role {
-    case OWNER;
-    case REALTOR;
-    case CLIENT;
+enum Role: string {
+    case OWNER = "owner";
+    case REALTOR = "realtor";
+    case CLIENT = "client";
 }
 
 class User
@@ -38,7 +38,7 @@ class User
             $user->fullname = $row->fullname;
             $user->phone = $row->phone;
             $user->email = $row->email;
-            $user->role = $row->role;
+            $user->role = Role::from($row->role);
             $users[] = $user;
         }
 
@@ -46,7 +46,7 @@ class User
     }
 
     // Знайти користувача за його ID
-    public static function find(PDO $pdo, $id)
+    public static function findByID(PDO $pdo, $id)
     {
         $sql = "SELECT * FROM users WHERE id = :id";
         $stmt = $pdo->prepare($sql);
@@ -62,7 +62,32 @@ class User
                 $user->fullname = $res->fullname;
                 $user->phone = $res->phone;
                 $user->email = $res->email;
-                $user->role = $res->role;
+                $user->role = Role::from($res->role);
+                return $user;
+            }
+        }
+
+        return null;
+    }
+
+    // Знайти користувача за його username та password
+    public static function findByUsername(PDO $pdo, $username)
+    {
+        $sql = "SELECT * FROM users WHERE username = :username";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':username', $username);
+
+        if ($stmt->execute()) {
+            $res = $stmt->fetch(PDO::FETCH_OBJ);
+            if ($res) {
+                $user = new User($pdo);
+                $user->id = $res->id;
+                $user->username = $res->username;
+                $user->password = $res->password;
+                $user->fullname = $res->fullname;
+                $user->phone = $res->phone;
+                $user->email = $res->email;
+                $user->role = Role::from($res->role);
                 return $user;
             }
         }
@@ -91,7 +116,7 @@ class User
             $user->fullname = $fullname;
             $user->phone = $phone;
             $user->email = $email;
-            $user->role = $role;
+            $user->role = Role::from($role);
             return $user;
         } else {
             return null;

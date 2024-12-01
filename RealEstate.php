@@ -1,17 +1,17 @@
 <?php
 
-enum EstateType {
-    case APARTMENT;
-    case HOUSE;
-    case COMMERCIAL;
-    case LAND;
-    case GARAGE;
+enum EstateType: string {
+    case APARTMENT = "apartment";
+    case HOUSE = "House";
+    case COMMERCIAL = "commercial";
+    case LAND = "land";
+    case GARAGE = "garage";
 }
 
-enum SaleType {
-    case SALE;
-    case RENT;
-    case SUBLET;
+enum SaleType: string {
+    case SALE = "Sale";
+    case RENT = "rent";
+    case SUBLET = "sublet";
 }
 
 class RealEstate
@@ -44,8 +44,8 @@ class RealEstate
             $estate = new RealEstate($pdo);
             $estate->id = $row->id;
             $estate->location = $row->location;
-            $estate->estate_type = $row->estate_type;
-            $estate->sale_type = $row->sale_type;
+            $estate->estate_type = EstateType::from($row->estate_type);
+            $estate->sale_type = SaleType::from($row->sale_type);
             $estate->area = $row->area;
             $estate->description = $row->description;
             $estate->owner_id = $row->owner_id;
@@ -70,8 +70,8 @@ class RealEstate
                 $estate = new RealEstate($pdo);
                 $estate->id = $res->id;
                 $estate->location = $res->location;
-                $estate->estate_type = $res->estate_type;
-                $estate->sale_type = $res->sale_type;
+                $estate->estate_type = EstateType::from($res->estate_type);
+                $estate->sale_type = SaleType::from($res->sale_type);
                 $estate->area = $res->area;
                 $estate->description = $res->description;
                 $estate->owner_id = $res->owner_id;
@@ -103,8 +103,8 @@ class RealEstate
             $estate = new RealEstate($pdo);
             $estate->id = $pdo->lastInsertId();;
             $estate->location = $location;
-            $estate->estate_type = $estate_type;
-            $estate->sale_type = $sale_type;
+            $estate->estate_type = EstateType::from($estate_type);
+            $estate->sale_type = SaleType::from($sale_type);
             $estate->area = $area;
             $estate->description = $description;
             $estate->owner_id = $owner_id;
