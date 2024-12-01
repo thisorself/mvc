@@ -87,7 +87,7 @@ class RealEstate
     // Додавання новоi нерухомостi
     public static function create($pdo, $location, $estate_type, $sale_type, $area, $description, $owner_id, $realtor_id, $price)
     {
-        $sql = "INSERT INTO users (location, estate_type, sale_type, area, description, owner_id, realtor_id, price) 
+        $sql = "INSERT INTO real_estates (location, estate_type, sale_type, area, description, owner_id, realtor_id, price) 
                 VALUES (:location, :estate_type, :sale_type, :area, :description, :owner_id, :realtor_id, :price)";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':location', $location);
@@ -119,16 +119,18 @@ class RealEstate
     // Оновлення існуючоi нерухомостi
     public function update()
     {
-        $sql = "UPDATE users SET username = :username, password = :password, fullname = :fullname,
-                                 phone = :phone, email = :email, role = :role WHERE id = :id";
+        $sql = "UPDATE real_estates SET location = :location, estate_type = :estate_type, sale_type = :sale_type, area = :area
+                                        description = :description, owner_id = :owner_id, realtor_id = :realtor_id, price = :price";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':id', $this->id);
-        $stmt->bindParam(':username', $this->username);
-        $stmt->bindParam(':password', $this->password);
-        $stmt->bindParam(':fullname', $this->fullname);
-        $stmt->bindParam(':phone', $this->phone);
-        $stmt->bindParam(':email', $this->email);
-        $stmt->bindParam(':role', $this->role);
+        $stmt->bindParam(':location', $this->location);
+        $stmt->bindParam(':estate_type', $this->estate_type);
+        $stmt->bindParam(':sale_type', $this->sale_type);
+        $stmt->bindParam(':area', $this->area);
+        $stmt->bindParam(':description', $this->description);
+        $stmt->bindParam(':owner_id', $this->owner_id);
+        $stmt->bindParam(':ownerealtor_idr_id', $this->realtor_id);
+        $stmt->bindParam(':price', $this->price);
 
         if ($stmt->execute()) {
             return true;
@@ -138,14 +140,14 @@ class RealEstate
     }
 
     // Видалення нерухомостi
-    public static function delete(PDO $pdo, User &$user)
+    public static function delete(PDO $pdo, RealEstate &$estate)
     {
-        $sql = "DELETE FROM users WHERE id = :id";
+        $sql = "DELETE FROM real_estates WHERE id = :id";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':id', $user->id);
+        $stmt->bindParam(':id', $estate->id);
 
         if ($stmt->execute()) {
-            unset($user);
+            unset($estate);
             return true;
         } else {
             return false;
