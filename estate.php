@@ -14,10 +14,18 @@ if (!isset($_GET['real_estate']) || !isset($_GET['mode'])) {
 }
 
 $estates = RealEstate::all($pdo);
-$estate = $estates[$_GET['real_estate']];
+$i = $_GET['real_estate'];
+$estate = $estates[$i];
 $mode = $_GET['mode'];
 
 if ($mode == 'read') {
+    $list = "";
+    if ($i != 0)
+        $list .= '<a href="estate.php?mode=read&real_estate=' . $i - 1 . '">Назад</a><br>';
+    if ($i + 1 != count($estates))
+        $list .= '<a href="estate.php?mode=read&real_estate=' . $i + 1 . '">Вперед</a><br>';
+
+
     print 
         '<p>Номер нерухомостi: ' . $estate->id . '</p>
         <p>Мiсце знаходження:' . $estate->location . '</p>
@@ -27,25 +35,24 @@ if ($mode == 'read') {
         <p>Опис:' . $estate->description . '</p>
         <p>Володар нерухомостi:' . User::findByID($pdo, $estate->owner_id)->fullname . '</p>
         <p>Рiелтор:' . User::findByID($pdo, $estate->realtor_id)->fullname . '</p>
-        <p>Цiна:' . $estate->price . '</p>
-        <a href="estate.php?mode=edit&real_estate=' . $_GET['real_estate'] . '">Редагувати</a><br>
-        <a href="estate.php?mode=read&real_estate=0">Видалити</a>';
+        <p>Цiна:' . $estate->price . '</p>' . $list . '
+        <a href="estate.php?mode=edit&real_estate=' . $i . '">Редагувати</a><br>
+        <a href="edit.php?do=delete&real_estate=' . $estate->id . '">Видалити</a>';
 }
 
 if ($mode == 'edit') {
     print
-        '<form action="save.php" method="POST">
+        '<form action="edit.php?do=edit&real_estate=' . $estate->id . '" method="POST">
         <p>Номер нерухомостi: ' . $estate->id . '</p>
-        <p>Мiсце знаходження: <input type="text" name="location" value="' . htmlspecialchars($estate->location) . '"></p>
-        <p>Тип нерухомостi: <input type="text" name="estate_type" value="' . htmlspecialchars($estate->estate_type->value) . '"></p>
-        <p>Тип договору: <input type="text" name="sale_type" value="' . htmlspecialchars($estate->sale_type->value) . '"></p>
-        <p>Площа: <input type="text" name="area" value="' . htmlspecialchars($estate->area) . '"></p>
-        <p>Опис: <input type="text" name="descriptiom" value="' . htmlspecialchars($estate->description) . '"></p>
-        <p>Володар нерухомостi: <input type="text" name="owner_" value="' . htmlspecialchars(User::findByID($pdo, $estate->owner_id)->fullname) . '"></p>
-        <p>Рiелтор: <input type="text" name="realtor" value="' . htmlspecialchars(User::findByID($pdo, $estate->realtor_id)->fullname) . '"></p>
-        <p>Цiна: <input type="text" name="price" value="' . htmlspecialchars($estate->price) . '"></p>
-        <input type="submit" value="Зберегти">    
-        <input type="submit" value="Видалити">    
+        <p>Мiсце знаходження: <input type="text" name="location" value="' . $estate->location . '"></p>
+        <p>Тип нерухомостi: <input type="text" name="estate_type" value="' . $estate->estate_type->value . '"></p>
+        <p>Тип договору: <input type="text" name="sale_type" value="' . $estate->sale_type->value . '"></p>
+        <p>Площа: <input type="text" name="area" value="' . $estate->area . '"></p>
+        <p>Опис: <input type="text" name="description" value="' . $estate->description . '"></p>
+        <p>Володар нерухомостi: <input type="text" name="owner" value="' . User::findByID($pdo, $estate->owner_id)->fullname . '"></p>
+        <p>Рiелтор: <input type="text" name="realtor" value="' . User::findByID($pdo, $estate->realtor_id)->fullname . '"></p>
+        <p>Цiна: <input type="text" name="price" value="' . $estate->price . '"></p>
+        <input type="submit" value="Зберегти">     
         </form>';
 }
 

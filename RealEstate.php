@@ -1,17 +1,17 @@
 <?php
 
 enum EstateType: string {
-    case APARTMENT = "apartment";
+    case APARTMENT = "Apartment";
     case HOUSE = "House";
-    case COMMERCIAL = "commercial";
-    case LAND = "land";
-    case GARAGE = "garage";
+    case COMMERCIAL = "Commercial";
+    case LAND = "Land";
+    case GARAGE = "Garage";
 }
 
 enum SaleType: string {
     case SALE = "Sale";
-    case RENT = "rent";
-    case SUBLET = "sublet";
+    case RENT = "Rent";
+    case SUBLET = "Sublet";
 }
 
 class RealEstate
@@ -119,17 +119,21 @@ class RealEstate
     // Оновлення існуючоi нерухомостi
     public function update()
     {
-        $sql = "UPDATE real_estates SET location = :location, estate_type = :estate_type, sale_type = :sale_type, area = :area
-                                        description = :description, owner_id = :owner_id, realtor_id = :realtor_id, price = :price";
+        $estate_type = $this->estate_type->value;
+        $sale_type = $this->sale_type->value;
+
+        $sql = "UPDATE real_estates SET location = :location, estate_type = :estate_type, sale_type = :sale_type, area = :area,
+                                        description = :description, owner_id = :owner_id, realtor_id = :realtor_id, price = :price
+                                    WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':id', $this->id);
         $stmt->bindParam(':location', $this->location);
-        $stmt->bindParam(':estate_type', $this->estate_type);
-        $stmt->bindParam(':sale_type', $this->sale_type);
+        $stmt->bindParam(':estate_type', $estate_type);
+        $stmt->bindParam(':sale_type', $sale_type);
         $stmt->bindParam(':area', $this->area);
         $stmt->bindParam(':description', $this->description);
         $stmt->bindParam(':owner_id', $this->owner_id);
-        $stmt->bindParam(':ownerealtor_idr_id', $this->realtor_id);
+        $stmt->bindParam(':realtor_id', $this->realtor_id);
         $stmt->bindParam(':price', $this->price);
 
         if ($stmt->execute()) {

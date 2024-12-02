@@ -95,6 +95,31 @@ class User
         return null;
     }
 
+        // Знайти користувача за його fullname
+        public static function findByFullname(PDO $pdo, $fullname)
+        {
+            $sql = "SELECT * FROM users WHERE fullname = :fullname";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':fullname', $fullname);
+    
+            if ($stmt->execute()) {
+                $res = $stmt->fetch(PDO::FETCH_OBJ);
+                if ($res) {
+                    $user = new User($pdo);
+                    $user->id = $res->id;
+                    $user->username = $res->username;
+                    $user->password = $res->password;
+                    $user->fullname = $res->fullname;
+                    $user->phone = $res->phone;
+                    $user->email = $res->email;
+                    $user->role = Role::from($res->role);
+                    return $user;
+                }
+            }
+    
+            return null;
+        }
+
     // Додавання нового користувача
     public static function create($pdo, $username, $password, $fullname, $phone, $email, $role)
     {
