@@ -70,7 +70,7 @@ class User
         return null;
     }
 
-    // Знайти користувача за його username та password
+    // Знайти користувача за його username
     public static function findByUsername(PDO $pdo, $username)
     {
         $sql = "SELECT * FROM users WHERE username = :username";
