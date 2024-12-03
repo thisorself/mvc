@@ -1,6 +1,6 @@
 <?php
-include 'connection.php';
-include 'Model.php';
+include_once 'core/connection.php';
+include_once 'core/Model.php';
 
 class Controller
 {
