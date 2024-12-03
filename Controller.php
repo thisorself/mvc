@@ -9,7 +9,7 @@ class Controller
     public static function showReadEstate($id)
     {
         global $pdo;
-        $estates = RealEstate::all($pdo, 'real_estates');
+        $estates = RealEstate::all($pdo);
 
         $list = "";
         if ($id > 0)
@@ -27,8 +27,8 @@ class Controller
             <p>Тип договору:' . $estate->fields->sale_type . '</p>
             <p>Площа:' . $estate->fields->area . '</p>
             <p>Опис:' . $estate->fields->description . '</p>
-            <p>Володар нерухомостi:' . User::findByID($pdo, $estate->fields->owner_id)->fields->fullname . '</p>
-            <p>Рiелтор:' . User::findByID($pdo, $estate->fields->realtor_id)->fields->fullname . '</p>
+            <p>Володар нерухомостi:' . $estate->getUserFullname(Role::OWNER) . '</p>
+            <p>Рiелтор:' . $estate->getUserFullname(Role::REALTOR) . '</p>
             <p>Цiна:' . $estate->fields->price . '</p>' . $list . '
             <a href="estate.php?mode=edit&real_estate=' . $id . '">Редагувати</a><br>
             <a href="edit.php?do=delete&real_estate=' . $estate->fields->id . '">Видалити</a>';
@@ -37,7 +37,7 @@ class Controller
     public static function showEditEstate($id)
     {
         global $pdo;
-        $estates = RealEstate::all($pdo, 'real_estates');
+        $estates = RealEstate::all($pdo);
         $estate = $estates[$id];
 
         print
@@ -48,8 +48,8 @@ class Controller
             <p>Тип договору: <input type="text" name="sale_type" value="' . $estate->fields->sale_type . '"></p>
             <p>Площа: <input type="text" name="area" value="' . $estate->fields->area . '"></p>
             <p>Опис: <input type="text" name="description" value="' . $estate->fields->description . '"></p>
-            <p>Володар нерухомостi: <input type="text" name="owner" value="' . User::findByID($pdo, $estate->fields->owner_id)->fields->fullname . '"></p>
-            <p>Рiелтор: <input type="text" name="realtor" value="' . User::findByID($pdo, $estate->fields->realtor_id)->fields->fullname . '"></p>
+            <p>Володар нерухомостi: <input type="text" name="owner" value="' . $estate->getUserFullname(Role::OWNER) . '"></p>
+            <p>Рiелтор: <input type="text" name="realtor" value="' . $estate->getUserFullname(Role::REALTOR) . '"></p>
             <p>Цiна: <input type="text" name="price" value="' . $estate->fields->price . '"></p>
             <input type="submit" value="Зберегти">     
             </form>';
@@ -153,7 +153,7 @@ class Controller
     public static function showAllEstate()
     {
         global $pdo;
-        $estates = RealEstate::all($pdo, 'real_estates');
+        $estates = RealEstate::all($pdo);
 
         if (count($estates) == 0) {
             "Немае записiв у таблицi!";
@@ -174,10 +174,28 @@ class Controller
             print "<td>" . $estate->fields->sale_type . "</td>";
             print "<td>" . $estate->fields->area . "</td>";
             print "<td>" . $estate->fields->description . "</td>";
-            print "<td>" . User::findByID($pdo, $estate->fields->owner_id)->fields->fullname . "</td>";
-            print "<td>" . User::findByID($pdo, $estate->fields->realtor_id)->fields->fullname . "</td>";
+            print "<td>" . $estate->getUserFullname(Role::OWNER) . "</td>";
+            print "<td>" . $estate->getUserFullname(Role::REALTOR) . "</td>";
             print "<td>" . $estate->fields->price . "</td>";
             print "</tr>";
+        }
+    }
+
+    public static function CheckLogIn() {
+        global $pdo;
+        if (!isset($_COOKIE['token'])) {
+            print '<h4>Незареестрований гiсть!</h4>
+                   <form action="register.php" method="POST">
+                   <p>Введiть нiкнейм:</p><input type="text" name="username">
+                   <p>Введiть пароль:</p><input type="text" name="password"><br>
+                   <input type="submit" value="Зарееструватися"></button>';
+        }
+        else {
+            $user = User::find($pdo, $_COOKIE['user_id']);
+            print $user->fields->fullname . " вітаємо!<br>";
+            setcookie('token', $user->fields->password, time() + 2000);
+            setcookie('user_id', $user->fields->id, time() + 2000);
+            print "<a href='estate.php?mode=read&real_estate=0'>Перейти до перегляду нерухомостi.</a>";
         }
     }
 

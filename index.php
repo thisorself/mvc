@@ -9,17 +9,22 @@
 <body>
 
     <?php
-    include 'core/connection.php';
-    include 'models/User.php';
-    include 'Controller.php';
+    include_once 'core/connection.php';
+    include_once 'models/User.php';
+    include_once 'Controller.php';
 
-    if (!isset($_COOKIE['token'])) {
-        print '<h4>Незареестрований гiсть!</h4>
-               <form action="register.php" method="POST">
-               <p>Введiть нiкнейм:</p><input type="text" name="username">
-               <p>Введiть пароль:</p><input type="text" name="password"><br>
-               <input type="submit" value="Зарееструватися"></button>';
+    Controller::CheckLogIn();
+    /*
+    $realtors = User::getByRole(Role::OWNER);
+    foreach ($realtors as $realtor) {
+        $where = ['id' => $realtor->fields->id];
+        $estates = RealEstate::hasMany($pdo, $where);
+        foreach ($estates as $estate) {
+            print $estate->fields->location;
+        }
     }
+        */
+
 
     ?>
 

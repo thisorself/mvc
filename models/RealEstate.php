@@ -18,15 +18,15 @@ enum SaleType: string {
 
 class RealEstate extends Model
 {
-    public function __construct($pdo)
+    public function __construct($pdo, $table = 'real_estates', $data = null)
     {
-        parent::__construct($pdo, 'real_estates');
+        parent::__construct($pdo, $table, $data);
     }
 
     // Отримання всіх нерухомістей з таблиці "real_estates"
-    public static function all($pdo, $table = 'real_estates')
+    public static function all($pdo, $obj = 'RealEstate', $table = 'real_estates')
     {
-        return parent::all($pdo, $table);
+        return parent::all($pdo, $obj,$table);
     }
 
     public static function find($pdo, $id, $table = 'real_estates') {
@@ -38,6 +38,23 @@ class RealEstate extends Model
     {   
         if ($fields) {
             return parent::create($pdo, $fields, $table);
+        }
+    }
+
+    public static function hasMany($pdo, $where, $table = 'real_estates') {
+        return parent::hasMany($pdo, $where, $table);
+    }
+
+    public function getUserFullname($role) {
+        switch ($role) {
+            case Role::OWNER:
+                $user = $this->belongsTo('User', $this->fields->owner_id);
+                if ($user) return $user->fields->fullname;
+                else return "Вiдсутнiй/я";
+            case Role::REALTOR:
+                $user = $this->belongsTo('User', $this->fields->realtor_id);
+                if ($user) return $user->fields->fullname;
+                else return "Вiдсутнiй/я";
         }
     }
 }

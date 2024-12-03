@@ -2,12 +2,14 @@
 
 include_once 'Controller.php';
 
-class Model {
+class Model
+{
     protected $pdo;
     protected $table;
     public $fields;
 
-    public function __construct($pdo, $table, $data = null) {
+    public function __construct($pdo, $table, $data = null)
+    {
         $this->pdo = $pdo;
         if (!$this->table)
             $this->table = $table;
@@ -29,57 +31,62 @@ class Model {
         }
     }
 
-    protected static function getTableColumns($pdo, $table) {
+    protected static function getTableColumns($pdo, $table)
+    {
         $sql = "SHOW COLUMNS FROM $table";
         $statement = $pdo->query($sql);
 
         if ($statement->execute()) {
             return $statement->fetchAll(PDO::FETCH_OBJ);
-        }
-        else return null;
+        } else
+            return null;
     }
 
-    protected static function all($pdo, $table = null) {
+    protected static function all($pdo, $obj = 'Model', $table = null)
+    {
         if ($table) {
             $sql = "SELECT * FROM $table";
             $statement = $pdo->query($sql);
-    
+
             $models = [];
             if ($statement->execute()) {
                 $records = $statement->fetchAll(PDO::FETCH_OBJ);
-                foreach($records as $record) {
-                    $model = new Model($pdo, $table, $record);
-                    $models []= $model;
+                foreach ($records as $record) {
+                    $model = new $obj($pdo, $table, $record);
+                    $models[] = $model;
                 }
             }
             return $models;
-        }
-        else return null;
+        } else
+            return null;
     }
 
-    public static function find($pdo, $id, $table = null) {
+    public static function find($pdo, $id, $table = null)
+    {
         if ($table) {
             $sql = "SELECT * FROM $table WHERE id = :id";
             $statement = $pdo->prepare($sql);
             $statement->bindParam(":id", $id);
             $statement->execute();
-    
+
             if ($statement->rowCount() > 0) {
                 $record = $statement->fetch(PDO::FETCH_OBJ);
                 return new Model($pdo, $table, $record);
-            }
-            else return null;
-        }
-        else return null;
+            } else
+                return null;
+        } else
+            return null;
     }
 
-    public static function count($pdo, $table) {
+    public static function count($pdo, $table)
+    {
         $sql = "SELECT COUNT(*) FROM $table";
         $statement = $pdo->query($sql);
         return $statement->fetch(PDO::FETCH_OBJ)->total;
     }
 
-    public static function create($pdo, $fields = null, $table = null) {
+    public static function create($pdo, $fields = null, $table = null)
+    {
         if ($table && $fields) {
             $table_columns = static::getTableColumns($pdo, $table);
             if ($table_columns && count($table_columns) == count($fields)) {
@@ -90,13 +97,14 @@ class Model {
                     $model->fields->$fd = $fields[$i];
                 }
                 return $model;
-            }
-            else return null;
-        }
-        else return null;
+            } else
+                return null;
+        } else
+            return null;
     }
 
-    public function insert() {
+    public function insert()
+    {
         $table_columns = static::getTableColumns($this->pdo, $this->table);
         if ($table_columns) {
             array_shift($table_columns);
@@ -105,8 +113,8 @@ class Model {
             $columns = [];
             $parameters = [];
             foreach ($table_columns as $table_column) {
-                $columns []= $table_column->Field;
-                $parameters []= ':' . $table_column->Field;
+                $columns[] = $table_column->Field;
+                $parameters[] = ':' . $table_column->Field;
             }
             $sql .= implode(', ', $columns) . ') VALUES (' . implode(', ', $parameters) . ')';
 
@@ -124,14 +132,15 @@ class Model {
         }
     }
 
-    public function update() {
+    public function update()
+    {
         $table_columns = static::getTableColumns($this->pdo, $this->table);
         if ($table_columns) {
             $sql = 'UPDATE ' . $this->table . ' SET ';
-            
+
             $pairs = [];
             foreach ($table_columns as $table_column) {
-                $pairs []= $table_column->Field . ' = :' . $table_column->Field; 
+                $pairs[] = $table_column->Field . ' = :' . $table_column->Field;
             }
 
             $id = $pairs[0];
@@ -167,5 +176,38 @@ class Model {
         } else {
             return false;
         }
+    }
+
+    public function belongsTo($className, $key) {
+        $model = $className::find($this->pdo, $key);
+        if ($model) return $model;
+        else return null;
+    }
+
+    public static function hasMany($pdo, $where, $table = null)
+    {
+        $sql = "SELECT * FROM $table WHERE ";
+
+        $pairs = [];
+        foreach ($where as $key => $value) {
+            $pairs[] = $key . ' = :' . $key;
+        }
+        $sql .= implode(' AND ', $pairs);
+
+        $statement = $pdo->prepare($sql);
+
+        foreach ($where as $key => $value) {
+            $statement->bindValue(':' . $key, $value);
+        }
+
+        $models = [];
+        if ($statement->execute()) {
+            $records = $statement->fetchAll(PDO::FETCH_OBJ);
+            foreach ($records as $record) {
+                $model = new Model($pdo, $table, $record);
+                $models []= $model;
+            }
+        }
+        return $models;
     }
 }

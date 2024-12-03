@@ -11,21 +11,21 @@ enum Role: string
 
 class User extends Model
 {
-    public function __construct($pdo)
+    public function __construct($pdo, $table = 'users', $data = null)
     {
-        parent::__construct($pdo, 'users');
+        parent::__construct($pdo, $table, $data);
     }
 
     // Отримання всіх користувачів з таблиці "users"
-    public static function all($pdo, $table = 'users')
+    public static function all($pdo, $obj = 'User', $table = 'users')
     {
-        return parent::all($pdo, $table);
+        return parent::all($pdo, $obj, $table);
     }
 
     // Знайти користувача за його ID
-    public static function findByID(PDO $pdo, $id)
+    public static function find($pdo, $id, $table = 'users')
     {
-        return parent::find($pdo, $id, 'users');
+        return parent::find($pdo, $id, $table);
     }
 
     // Знайти користувача за його username
@@ -83,5 +83,37 @@ class User extends Model
         if ($fields) {
             return parent::create($pdo, $fields, $table);
         }
+    }
+
+    public static function isExists($pdo) {
+        $username = isset($_POST['username']) ? $_POST['username'] : "";
+        $password = isset($_POST['password']) ? $_POST['password'] : "";
+    
+        $user = User::findByUsername($pdo, $username);
+    
+        if ($user && password_verify($password, $user->fields->password)) {
+            setcookie('token', $user->fields->password, time() + 2000);
+            setcookie('user_id', $user->fields->id, time() + 2000);
+            return $user;
+        }
+        else 
+            return null;
+    }
+
+    public static function hasMany($pdo, $where, $table = 'users') {
+        return parent::hasMany($pdo, $where, $table);
+    }
+
+    public static function getByRole($role) {
+        global $pdo;
+        $all_users = User::all($pdo);
+        
+        $want_users = [];
+        foreach ($all_users as $user) {
+            if ($user->fields->role == $role->value) {
+                $want_users []= $user;
+            }
+        }
+        return $want_users;
     }
 }
