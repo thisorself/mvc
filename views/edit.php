@@ -1,15 +1,11 @@
 <?php
-include_once '../core/connection.php';
-include_once '../core/Controller.php';
-include_once '../models/User.php';
-include_once '../models/RealEstate.php';
-include_once '../controllers/RealEstateController.php';
-include_once '../controllers/UserController.php';
 
+/*
 if (!isset($_COOKIE['token'])) {
     print 'Немае доступу!';
     exit;
 }
+    */
 
 if (!isset($_GET['real_estate']) && !isset($_GET['user']) || (isset($_GET['real_estate']) && isset($_GET['user']))) {
     print 'Немае нерухомостi та користувача пiд таким номером або внутрiшня помилка!';

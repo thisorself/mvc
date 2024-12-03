@@ -1,14 +1,11 @@
 <?php
-include_once '../core/connection.php';
-include_once '../core/Controller.php';
-include_once '../models/User.php';
-include_once '../controllers/RealEstateController.php';
 
+/*
 if (!isset($_COOKIE['token'])) {
     print 'Немае доступу!';
     exit;
 }
-
+*/
 if (!isset($_GET['real_estate']) || !isset($_GET['mode'])) {
     print 'Немае нерухомостi пiд таким номером або внутрiшня помилка!';
     exit;

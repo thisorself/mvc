@@ -1,5 +1,4 @@
 <?php
-include_once __DIR__ . '/../core/Controller.php';
 
 class UserController extends Controller {
     public function __construct($pdo) {
@@ -210,21 +209,30 @@ class UserController extends Controller {
         print '<a href="user.php?mode=read&user=1">Повернутися</a>';
     }
 
-    public function checkLogIn() {
-        if (!isset($_COOKIE['token'])) {
-            print '<h4>Незареестрований гiсть!</h4>
-                   <form action="register.php" method="POST">
-                   <p>Введiть нiкнейм:</p><input type="text" name="username">
-                   <p>Введiть пароль:</p><input type="text" name="password"><br>
-                   <input type="submit" value="Зарееструватися"></button>';
-        }
-        else {
-            $user = User::find($this->pdo, $_COOKIE['user_id']);
-            print $user->fields->fullname . " вітаємо!<br>";
-            setcookie('token', $user->fields->password, time() + 2000);
-            setcookie('user_id', $user->fields->id, time() + 2000);
-            print "<a href='views/estate.php?mode=read&real_estate=1'>Перейти до перегляду нерухомостi.</a><br>";
-            print "<a href='views/user.php?mode=read&user=1'>Перейти до перегляду користувачiв.</a>";
+    public function login() {
+        session_start();
+
+        if (!isset($_SESSION['token']) || !isset($_SESSION['user_id'])) {
+            echo '<h4>Незареєстрований гість!</h4>
+                  <form action="register.php" method="POST">
+                  <p>Введіть нікнейм:</p><input type="text" name="username">
+                  <p>Введіть пароль:</p><input type="password" name="password"><br>
+                  <input type="submit" value="Зареєструватися">';
+        } else {
+            $user = User::find($this->pdo, $_SESSION['user_id']);
+            if ($user && $user->fields->password == $_SESSION['token']) {
+                print $user->fields->fullname . " вітаємо!<br>";
+                print "<a href='views/estate.php?mode=read&real_estate=1'>Перейти до перегляду нерухомостi.</a><br>";
+                print "<a href='views/user.php?mode=read&real_estate=1'>Перейти до перегляду користувачiв.</a>";
+
+                $_SESSION['token'] = bin2hex(random_bytes(32));
+                $_SESSION['user_id'] = $user->fields->id;
+
+                echo "<a href='views/estate.php?mode=read&real_estate=1'>Перейти до перегляду нерухомості.</a><br>";
+                echo "<a href='views/user.php?mode=read&user=1'>Перейти до перегляду користувачів.</a>";
+            } else {
+                //реестрацiя
+            }
         }
     }
 }

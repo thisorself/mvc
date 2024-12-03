@@ -1,6 +1,5 @@
 <?php
 
-include_once '../core/Controller.php';
 
 class RealEstateController extends Controller {
     public function __construct($pdo) {
@@ -105,7 +104,7 @@ class RealEstateController extends Controller {
             <a href="../index.php">Повернутися</a>';
     }
 
-    public function edit_show($id) {
+    public function edit($id) {
         $estate = RealEstate::find($this->pdo, $id);
 
         print
@@ -217,7 +216,7 @@ class RealEstateController extends Controller {
         }
     }
 
-    private function edit($fields) {
+    private function editByFields($fields) {
         $estate = RealEstate::find($this->pdo, $_GET['real_estate']);
 
         foreach ($fields as $key => $value) {

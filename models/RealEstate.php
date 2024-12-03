@@ -1,6 +1,5 @@
 <?php
 
-include_once __DIR__ . '/../core/Model.php';
 
 enum EstateType: string {
     case APARTMENT = "Apartment";

@@ -1,8 +1,4 @@
 <?php
-include_once 'connection.php';
-include_once 'Model.php';
-include_once __DIR__ . '/../models/User.php';
-include_once __DIR__ . '/../models/RealEstate.php';
 
 class Controller
 {
