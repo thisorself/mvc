@@ -10,10 +10,12 @@
 
     <?php
     include_once 'core/connection.php';
-    include_once 'models/User.php';
-    include_once 'Controller.php';
+    include_once 'controllers/UserController.php';
 
-    Controller::CheckLogIn();
+    //$controller = new UserController($pdo);
+    //$controller->show(2);
+    $controller = new UserController($pdo);
+    $controller->CheckLogIn();
     /*
     $realtors = User::getByRole(Role::OWNER);
     foreach ($realtors as $realtor) {

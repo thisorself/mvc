@@ -1,6 +1,6 @@
 <?php
 
-include_once 'core/Model.php';
+include_once __DIR__ . '/../core/Model.php';
 
 enum Role: string
 {
@@ -23,9 +23,9 @@ class User extends Model
     }
 
     // Знайти користувача за його ID
-    public static function find($pdo, $id, $table = 'users')
+    public static function find($pdo, $id, $obj = 'User', $table = 'users')
     {
-        return parent::find($pdo, $id, $table);
+        return parent::find($pdo, $id, $obj, $table);
     }
 
     // Знайти користувача за його username

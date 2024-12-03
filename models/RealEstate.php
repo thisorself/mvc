@@ -1,6 +1,6 @@
 <?php
 
-include_once 'core/Model.php';
+include_once __DIR__ . '/../core/Model.php';
 
 enum EstateType: string {
     case APARTMENT = "Apartment";
@@ -29,8 +29,8 @@ class RealEstate extends Model
         return parent::all($pdo, $obj,$table);
     }
 
-    public static function find($pdo, $id, $table = 'real_estates') {
-        return parent::find($pdo, $id, $table);
+    public static function find($pdo, $id, $obj = 'RealEstate', $table = 'real_estates') {
+        return parent::find($pdo, $id, $obj, $table);
     }
 
     // Створення новоi нерухомостi
@@ -45,15 +45,17 @@ class RealEstate extends Model
         return parent::hasMany($pdo, $where, $table);
     }
 
-    public function getUserFullname($role) {
+    public function getUserFullname($role, $null = false) {
         switch ($role) {
             case Role::OWNER:
                 $user = $this->belongsTo('User', $this->fields->owner_id);
                 if ($user) return $user->fields->fullname;
+                elseif ($null) return null; 
                 else return "Вiдсутнiй/я";
             case Role::REALTOR:
                 $user = $this->belongsTo('User', $this->fields->realtor_id);
                 if ($user) return $user->fields->fullname;
+                elseif ($null) return null; 
                 else return "Вiдсутнiй/я";
         }
     }

@@ -44,11 +44,11 @@ class Model
 
     protected static function all($pdo, $obj = 'Model', $table = null)
     {
+        $models = [];
         if ($table) {
             $sql = "SELECT * FROM $table";
             $statement = $pdo->query($sql);
 
-            $models = [];
             if ($statement->execute()) {
                 $records = $statement->fetchAll(PDO::FETCH_OBJ);
                 foreach ($records as $record) {
@@ -58,10 +58,10 @@ class Model
             }
             return $models;
         } else
-            return null;
+            return $models;
     }
 
-    public static function find($pdo, $id, $table = null)
+    public static function find($pdo, $id, $obj = 'Model', $table = null)
     {
         if ($table) {
             $sql = "SELECT * FROM $table WHERE id = :id";
@@ -71,7 +71,7 @@ class Model
 
             if ($statement->rowCount() > 0) {
                 $record = $statement->fetch(PDO::FETCH_OBJ);
-                return new Model($pdo, $table, $record);
+                return new $obj($pdo, $table, $record);
             } else
                 return null;
         } else
@@ -80,7 +80,7 @@ class Model
 
     public static function count($pdo, $table)
     {
-        $sql = "SELECT COUNT(*) FROM $table";
+        $sql = "SELECT COUNT(*) AS total FROM $table";
         $statement = $pdo->query($sql);
         return $statement->fetch(PDO::FETCH_OBJ)->total;
     }
@@ -92,9 +92,11 @@ class Model
             if ($table_columns && count($table_columns) == count($fields)) {
                 $model = new Model($pdo, $table);
 
-                for ($i = 0; $i < count($table_columns); $i++) {
-                    $fd = $table_columns[$i]->Field;
-                    $model->fields->$fd = $fields[$i];
+                foreach ($table_columns as $table_column) {
+                    $fd = $table_column->Field;
+                    $value = $fields[$fd];
+                    Controller::EnumAndNull($value);
+                    $model->fields->$fd = $value;
                 }
                 return $model;
             } else
@@ -153,10 +155,13 @@ class Model
 
             foreach ($pairs as $pair) {
                 $p = explode(' = ', $pair)[0];
-                $statement->bindParam(':' . $p, Controller::EnumError($this->fields->$p));
+                $value = $this->fields->$p;
+                Controller::EnumAndNull($value);
+                $statement->bindParam(':' . $p, $value);
             }
 
             if ($statement->execute()) {
+                print "UPDATE=" . $statement->rowCount();
                 return true;
             } else {
                 return false;
@@ -176,6 +181,12 @@ class Model
         } else {
             return false;
         }
+    }
+
+    public static function getNewID($pdo, $table) {
+        $sql = "SELECT MAX(id) AS newID FROM $table";
+        $statement = $pdo->query($sql);
+        return $statement->fetch(PDO::FETCH_OBJ)->newID;
     }
 
     public function belongsTo($className, $key) {
