@@ -1,5 +1,7 @@
 <?php
 
+include_once 'Controller.php';
+
 class Model {
     protected $pdo;
     protected $table;
@@ -39,9 +41,8 @@ class Model {
 
     protected static function all($pdo, $table = null) {
         if ($table) {
-            $sql = "SELECT * FROM :table";
-            $statement = $pdo->prepare($sql);
-            $statement->bindParam(":table", $table);
+            $sql = "SELECT * FROM $table";
+            $statement = $pdo->query($sql);
     
             $models = [];
             if ($statement->execute()) {
@@ -143,7 +144,7 @@ class Model {
 
             foreach ($pairs as $pair) {
                 $p = explode(' = ', $pair)[0];
-                $statement->bindParam(':' . $p, $this->fields->$p);
+                $statement->bindParam(':' . $p, Controller::EnumError($this->fields->$p));
             }
 
             if ($statement->execute()) {

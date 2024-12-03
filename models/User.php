@@ -1,6 +1,6 @@
 <?php
 
-include 'core/Model.php';
+include_once 'core/Model.php';
 
 enum Role: string
 {

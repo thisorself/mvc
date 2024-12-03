@@ -1,7 +1,7 @@
 <?php
-include 'connection.php';
-include 'Controller.php';
-include 'User.php';
+include_once 'core/connection.php';
+include_once 'Controller.php';
+include_once 'models/User.php';
 
 if (!isset($_COOKIE['token'])) {
     print 'Немае доступу!';

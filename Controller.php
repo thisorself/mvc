@@ -1,18 +1,20 @@
 <?php
 include_once 'core/connection.php';
 include_once 'core/Model.php';
+include_once 'models/User.php';
+include_once 'models/RealEstate.php';
 
 class Controller
 {
     public static function showReadEstate($id)
     {
         global $pdo;
-        $estates = Model::all($pdo, 'real_estates');
+        $estates = RealEstate::all($pdo, 'real_estates');
 
         $list = "";
         if ($id > 0)
             $list .= '<a href="estate.php?mode=read&real_estate=' . $id - 1 . '">Назад</a>   ';
-        if ($id != count($estates))
+        if ($id != count($estates) - 1)
             $list .= '<a href="estate.php?mode=read&real_estate=' . $id + 1 . '">Вперед</a><br>';
         else
             $list .= '<br>';
@@ -25,8 +27,8 @@ class Controller
             <p>Тип договору:' . $estate->fields->sale_type . '</p>
             <p>Площа:' . $estate->fields->area . '</p>
             <p>Опис:' . $estate->fields->description . '</p>
-            <p>Володар нерухомостi:' . User::findByID($pdo, $estate->fields->owner_id)->fullname . '</p>
-            <p>Рiелтор:' . User::findByID($pdo, $estate->fields->realtor_id)->fullname . '</p>
+            <p>Володар нерухомостi:' . User::findByID($pdo, $estate->fields->owner_id)->fields->fullname . '</p>
+            <p>Рiелтор:' . User::findByID($pdo, $estate->fields->realtor_id)->fields->fullname . '</p>
             <p>Цiна:' . $estate->fields->price . '</p>' . $list . '
             <a href="estate.php?mode=edit&real_estate=' . $id . '">Редагувати</a><br>
             <a href="edit.php?do=delete&real_estate=' . $estate->fields->id . '">Видалити</a>';
@@ -35,7 +37,7 @@ class Controller
     public static function showEditEstate($id)
     {
         global $pdo;
-        $estates = Model::all($pdo, 'real_estates');
+        $estates = RealEstate::all($pdo, 'real_estates');
         $estate = $estates[$id];
 
         print
@@ -46,8 +48,8 @@ class Controller
             <p>Тип договору: <input type="text" name="sale_type" value="' . $estate->fields->sale_type . '"></p>
             <p>Площа: <input type="text" name="area" value="' . $estate->fields->area . '"></p>
             <p>Опис: <input type="text" name="description" value="' . $estate->fields->description . '"></p>
-            <p>Володар нерухомостi: <input type="text" name="owner" value="' . User::findByID($pdo, $estate->fields->owner_id)->fullname . '"></p>
-            <p>Рiелтор: <input type="text" name="realtor" value="' . User::findByID($pdo, $estate->fields->realtor_id)->fullname . '"></p>
+            <p>Володар нерухомостi: <input type="text" name="owner" value="' . User::findByID($pdo, $estate->fields->owner_id)->fields->fullname . '"></p>
+            <p>Рiелтор: <input type="text" name="realtor" value="' . User::findByID($pdo, $estate->fields->realtor_id)->fields->fullname . '"></p>
             <p>Цiна: <input type="text" name="price" value="' . $estate->fields->price . '"></p>
             <input type="submit" value="Зберегти">     
             </form>';
@@ -96,8 +98,8 @@ class Controller
             $user = User::findByFullname($pdo, $owner);
 
             if ($user) {
-                if ($user->role == Role::OWNER) {
-                    $owner = $user->id;
+                if ($user->fields->role == Role::OWNER) {
+                    $owner = $user->fields->id;
                 } else
                     $errors[] = "Користувач знайдений, але не з вiдповiдною роллю!";
             } else
@@ -109,8 +111,8 @@ class Controller
             $user = User::findByFullname($pdo, $realtor);
 
             if ($user) {
-                if ($user->role == Role::REALTOR) {
-                    $realtor = $user->id;
+                if ($user->fields->role == Role::REALTOR) {
+                    $realtor = $user->fields->id;
                 } else
                     $errors[] = "Користувач знайдений, але не з вiдповiдною роллю!";
             } else
@@ -124,14 +126,14 @@ class Controller
 
         if (!$errors) {
             $estate = RealEstate::find($pdo, $_GET['real_estate']);
-            $estate->location = $location;
-            $estate->estate_type = $estate_type;
-            $estate->sale_type = $sale_type;
-            $estate->area = $area;
-            $estate->description = $description;
-            $estate->owner_id = empty($owner) ? null : $owner;
-            $estate->realtor_id = empty($realtor) ? null : $realtor;
-            $estate->price = $price;
+            $estate->fields->location = $location;
+            $estate->fields->estate_type = $estate_type;
+            $estate->fields->sale_type = $sale_type;
+            $estate->fields->area = $area;
+            $estate->fields->description = $description;
+            $estate->fields->owner_id = empty($owner) ? null : $owner;
+            $estate->fields->realtor_id = empty($realtor) ? null : $realtor;
+            $estate->fields->price = $price;
             $estate->update();
             print "Нерухомiсть успiшно оновлена!";
         } else {
@@ -144,16 +146,14 @@ class Controller
     public static function deleteEstate()
     {
         global $pdo;
-        $estate = RealEstate::find($pdo, $_GET['real_estate']);
-        RealEstate::delete($pdo, $estate);
+        RealEstate::find($pdo, $_GET['real_estate'])->delete();
         print "Нерухомiсть успiшно видалена!";
     }
 
     public static function showAllEstate()
     {
-        include 'User.php';
         global $pdo;
-        $estates = Model::all($pdo, 'real_estates');
+        $estates = RealEstate::all($pdo, 'real_estates');
 
         if (count($estates) == 0) {
             "Немае записiв у таблицi!";
@@ -168,16 +168,28 @@ class Controller
 
         foreach ($estates as $estate) {
             print "<tr>";
-            print "<td>" . $estate->fields->lastInsertId . "</td>";
+            print "<td>" . $estate->fields->id . "</td>";
             print "<td>" . $estate->fields->location . "</td>";
             print "<td>" . $estate->fields->estate_type . "</td>";
             print "<td>" . $estate->fields->sale_type . "</td>";
             print "<td>" . $estate->fields->area . "</td>";
             print "<td>" . $estate->fields->description . "</td>";
-            print "<td>" . User::findByID($pdo, $estate->fields->owner_id)->fullname . "</td>";
-            print "<td>" . User::findByID($pdo, $estate->fields->realtor_id)->fullname . "</td>";
+            print "<td>" . User::findByID($pdo, $estate->fields->owner_id)->fields->fullname . "</td>";
+            print "<td>" . User::findByID($pdo, $estate->fields->realtor_id)->fields->fullname . "</td>";
             print "<td>" . $estate->fields->price . "</td>";
             print "</tr>";
+        }
+    }
+
+    public static function EnumError(&$value) {
+        if (is_object($value)) {
+            if (method_exists($value, '__toString')) {
+                $value = (string)$value;
+            } elseif (property_exists($value, 'value')) {
+                $value = (string)$value->value;
+            } else {
+                die('enum or else error');
+            }
         }
     }
 }

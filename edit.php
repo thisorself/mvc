@@ -1,7 +1,8 @@
 <?php
-include 'config.php';
-include 'User.php';
-include 'RealEstate.php';
+include_once 'core/connection.php';
+include_once 'models/User.php';
+include_once 'models/RealEstate.php';
+include_once 'Controller.php';
 
 if (!isset($_COOKIE['token'])) {
     print 'Немае доступу!';
